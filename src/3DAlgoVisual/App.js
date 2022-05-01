@@ -278,7 +278,7 @@ const Light = () => {
     <>
       <directionalLight
         ref={ref}
-        intensity={0.6}
+        intensity={0.3}
         position={[-100, 100, 0]}
         castShadow={true}
       />
