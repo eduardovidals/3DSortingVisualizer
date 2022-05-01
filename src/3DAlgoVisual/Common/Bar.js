@@ -2,7 +2,7 @@ import {MeshProps, useFrame} from "@react-three/fiber";
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import * as THREE from "three";
 
-function Box(props) {
+function Bar(props) {
   const {dimensions, position, meshRef, color} = props;
 
   return (
@@ -10,6 +10,7 @@ function Box(props) {
       ref={meshRef}
       position={position}
       scale={1}
+      castShadow={true}
     >
       <boxGeometry args={dimensions}/>
       <meshStandardMaterial color={color}/>
@@ -17,4 +18,4 @@ function Box(props) {
   )
 }
 
-export default Box;
+export default Bar;

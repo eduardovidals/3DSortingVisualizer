@@ -1,18 +1,10 @@
-import React, {useEffect, useRef, useState, createRef, Suspense} from 'react';
+import React, {useEffect, useRef, useState, createRef} from 'react';
 import * as THREE from 'three';
-import {Canvas, MeshProps, useFrame, useThree} from '@react-three/fiber';
-import {
-  FirstPersonControls,
-  FlyControls,
-  Loader,
-  OrbitControls,
-  PointerLockControls,
-  TrackballControls
-} from "@react-three/drei";
+import {Canvas, useFrame, useThree} from '@react-three/fiber';
+import {PointerLockControls, useHelper} from "@react-three/drei";
 
 import './App.css';
-import Group from "./Common/Group";
-import Box from './Common/Box';
+import Bar from './Common/Bar';
 import {getBubbleSortAnimations} from "./Algorithms/BubbleSort";
 import AlgoSliderSetting from "./Common/AlgoSliderSetting";
 import AlgoButton from "./Common/AlgoButton";
@@ -23,7 +15,7 @@ import {getSelectionSortAnimations} from "./Algorithms/SelectionSort";
 import {getMergeSortAnimations} from "./Algorithms/MergeSort";
 import {getQuickSortAnimations} from "./Algorithms/QuickSort";
 import AlgoButtonSetting from "./Common/AlgoButtonSetting";
-import {PlaneBufferGeometry} from "three";
+import {DirectionalLightHelper} from "three";
 
 const PRIMARY_COLOR = "white";
 const SECONDARY_COLOR = "red";
@@ -201,7 +193,7 @@ function App() {
   }
 
   const nodes = arr.map((number, index) => {
-    return <Box key={index} dimensions={[1, number, 1]} position={[0, number / 2 - 20, index * 2 - 100]}
+    return <Bar key={index} dimensions={[1, number, 1]} position={[0, number / 2 - 20, index * 2 - 100]}
                 meshRef={(ref) => itemsRef.current[index] = ref} color={PRIMARY_COLOR}/>;
   })
 
@@ -218,7 +210,7 @@ function App() {
             <AlgoSliderSetting settingDescription={"Control visualizer speed"}
                                statusDescription={sortingSpeed + " ms"}
                                disabled={optionsDisabled}
-                               onChange={sliderSpeed} defaultValue={1} min={1} max={100}/>
+                               onChange={sliderSpeed} defaultValue={1} min={1} max={1000}/>
 
             <div className={"sidebar-setting"}>
               <p> Choose an algorithm </p>
@@ -258,21 +250,40 @@ function App() {
       </div>
 
       <div className={'visualizer-wrapper'}>
-        <Canvas shadows camera={{position: [-150, 0, 0], fov: 90, far: 5000}}>
-          <pointLight position={[-50, 10, 0]} intensity={0.4}/>
-          <pointLight position={[50, 10, 0]} intensity={0.4}/>
+        <Canvas camera={{position: [-150, 0, 0], fov: 90, far: 5000}} shadows>
+          <Light/>
           <FPSControls/>
-          <Group>
+          <group castShadow={true} receiveShadow={true}>
             {nodes}
-          </Group>
-          <mesh rotation-x={Math.PI * -0.5} position={[0, -30, 0]}>
-            <planeBufferGeometry args={[1000, 1000]} />
-            <meshStandardMaterial color={"pink"} />
+          </group>
+          <mesh rotation-x={Math.PI * -0.5} position={[0, -30, 0]} receiveShadow={true}>
+            <planeBufferGeometry args={[3000, 3000]}/>
+            <meshStandardMaterial color={"pink"}/>
           </mesh>
         </Canvas>
       </div>
     </div>
   );
+}
+
+const Light = () => {
+  const ref = useRef()
+  useHelper(ref, DirectionalLightHelper, 1)
+
+  useFrame(() => {
+
+  })
+
+  return (
+    <>
+      <directionalLight
+        ref={ref}
+        intensity={0.6}
+        position={[-100, 100, 0]}
+        castShadow={true}
+      />
+    </>
+  )
 }
 
 function FPSControls() {
@@ -287,14 +298,14 @@ function FPSControls() {
   const {camera} = useThree();
 
   useFrame(() => {
-    if (W) ref.current.moveForward(0.5);
-    if (A) ref.current.moveRight(-0.5);
-    if (S) ref.current.moveForward(-0.5);
-    if (D) ref.current.moveRight(0.5);
+    if (W) ref.current.moveForward(1);
+    if (A) ref.current.moveRight(-1);
+    if (S) ref.current.moveForward(-1);
+    if (D) ref.current.moveRight(1);
     if (SPACE) {
-      camera.translateY(0.5);
+      camera.translateY(1);
       setTimeout(() => {
-        camera.translateY(-0.5);
+        camera.translateY(-1);
       }, 100)
     }
   })
@@ -305,30 +316,32 @@ function FPSControls() {
 }
 
 function useKeyPress(targetKey) {
-  // State for keeping track of whether key is pressed
+  // state for keeping track of whether key is pressed
   const [keyPressed, setKeyPressed] = useState(false);
-  // If pressed key is our target key then set to true
-  function downHandler({ key }) {
+
+  // if pressed key is our target key then set to true
+  function downHandler({key}) {
     if (key === targetKey) {
       setKeyPressed(true);
     }
   }
-  // If released key is our target key then set to false
-  const upHandler = ({ key }) => {
+
+  // if released key is our target key then set to false
+  const upHandler = ({key}) => {
     if (key === targetKey) {
       setKeyPressed(false);
     }
   };
-  // Add event listeners
+  // add event listeners
   useEffect(() => {
     window.addEventListener("keydown", downHandler);
     window.addEventListener("keyup", upHandler);
-    // Remove event listeners on cleanup
+    // remove event listeners on cleanup
     return () => {
       window.removeEventListener("keydown", downHandler);
       window.removeEventListener("keyup", upHandler);
     };
-  }, []); // Empty array ensures that effect is only run on mount and unmount
+  }, []); // empty array ensures that effect is only run on mount and unmount
   return keyPressed;
 }
 
