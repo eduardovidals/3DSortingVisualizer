@@ -29,7 +29,7 @@ function App() {
   const [arr, setArr] = useState([]);
   const [numberOfBoxes, setNumberOfBoxes] = useState(100);
   const [maxBoxHeight, setMaxBoxHeight] = useState(50);
-  const [sortingAlgorithm, setSortingAlgorithm] = useState("Bubble Sort");
+  const [sortingAlgorithm, setSortingAlgorithm] = useState("Merge Sort");
   const [clickedRun, setClickedRun] = useState(false);
   const [sortingSpeed, setSortingSpeed] = useState(1);
   const [showSortingOptions, setShowSortingOptions] = useState(false);
